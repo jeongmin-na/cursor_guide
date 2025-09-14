@@ -306,6 +306,12 @@
                 <li><a href="#section-8" class="level-1">8. 문제해결 가이드</a></li>
                 <li><a href="#section-8-1" class="level-2">8.1 일반적인 문제 및 해결방법</a></li>
                 <li><a href="#section-8-2" class="level-2">8.2 주요 문제 유형별 분석</a></li>
+                <li><a href="#section-8-2-1" class="level-3" style="padding-left: 35px; font-size: 11px;">8.2.1 채팅 컨텍스트 길이 문제</a></li>
+                <li><a href="#section-8-2-2" class="level-3" style="padding-left: 35px; font-size: 11px;">8.2.2 AI 질문 이해 및 응답 문제</a></li>
+                <li><a href="#section-8-2-3" class="level-3" style="padding-left: 35px; font-size: 11px;">8.2.3 네트워크 및 기술적 이슈</a></li>
+                <li><a href="#section-8-2-4" class="level-3" style="padding-left: 35px; font-size: 11px;">8.2.4 키보드 단축키 충돌</a></li>
+                <li><a href="#section-8-2-5" class="level-3" style="padding-left: 35px; font-size: 11px;">8.2.5 AI 모델별 성능 차이</a></li>
+                <li><a href="#section-8-2-6" class="level-3" style="padding-left: 35px; font-size: 11px;">8.2.6 시스템 환경 문제</a></li>
                 <li><a href="#section-8-3" class="level-2">8.3 트러블슈팅 체크리스트</a></li>
                 
                 <li><a href="#section-9" class="level-1">9. Cursor AI 워크플로우 완전 가이드</a></li>
@@ -1012,7 +1018,8 @@ document<span class="token punctuation">.</span><span class="token function">get
                 
                 <div id="section-8-2">
                     <h3>8.2 주요 문제 유형별 분석</h3>
-                    <h4>8.2.1 채팅 컨텍스트 길이 문제</h4>
+                    
+                    <h4 id="section-8-2-1">8.2.1 채팅 컨텍스트 길이 문제</h4>
                     <p><strong>문제 현상:</strong></p>
                     <ul>
                         <li>대화가 길어질수록 AI 응답 속도 저하</li>
@@ -1020,14 +1027,73 @@ document<span class="token punctuation">.</span><span class="token function">get
                         <li>토큰 제한 초과로 인한 기능 제한</li>
                     </ul>
                     
+                    <p><strong>원인 분석:</strong></p>
+                    <p>AI 모델의 토큰 처리 한계와 메모리 제약으로 인해 긴 대화 기록을 모두 처리하기 어려운 상황이 발생합니다. 특히 복잡한 코드 분석이나 긴 디버깅 세션에서 이러한 문제가 빈번히 나타납니다.</p>
+                    
                     <p><strong>해결방안:</strong></p>
                     <ul>
-                        <li>대화 요약 기능 활용: 주기적으로 대화 내용을 요약하여 핵심 정보만 유지</li>
-                        <li>새 채팅 세션 시작: 일정 길이 이상 누적 시 새로운 세션으로 전환</li>
-                        <li>프롬프트 최적화: 불필요한 배경 설명 제거, 핵심 질문만 포함</li>
+                        <li><strong>대화 요약 기능 활용:</strong> 주기적으로 대화 내용을 요약하여 핵심 정보만 유지</li>
+                        <li><strong>새 채팅 세션 시작:</strong> 일정 길이 이상 누적 시 새로운 세션으로 전환</li>
+                        <li><strong>프롬프트 최적화:</strong> 불필요한 배경 설명 제거, 핵심 질문만 포함</li>
+                        <li><strong>최대 토큰 수 조정:</strong> 플랫폼 설정에서 토큰 제한 조정</li>
                     </ul>
                     
-                    <h4>8.2.2 네트워크 및 기술적 이슈</h4>
+                    <h4 id="section-8-2-2">8.2.2 AI 질문 이해 및 응답 문제</h4>
+                    <p><strong>문제 현상:</strong></p>
+                    <ul>
+                        <li>질문 의도와 다른 답변 제공</li>
+                        <li>모호하거나 불완전한 코드 생성</li>
+                        <li>컨텍스트를 제대로 파악하지 못하는 상황</li>
+                        <li>같은 질문에 일관성 없는 답변</li>
+                        <li>과도하게 복잡하거나 기술적인 설명</li>
+                        <li>관련성 없는 예시나 해결책 제시</li>
+                    </ul>
+                    
+                    <p><strong>원인 분석:</strong></p>
+                    <ul>
+                        <li><strong>프롬프트 문제:</strong> 너무 모호하거나 복잡한 질문</li>
+                        <li><strong>컨텍스트 부족:</strong> 프로젝트 정보나 기술 스택 명시 부족</li>
+                        <li><strong>모델 특성 불일치:</strong> AI 모델의 강점과 맞지 않는 질문 방식</li>
+                        <li><strong>기대치 불명확:</strong> 원하는 결과물의 수준이나 형태 불분명</li>
+                        <li><strong>언어적 한계:</strong> 자연어 처리의 한계로 인한 오해</li>
+                    </ul>
+                    
+                    <p><strong>해결방안:</strong></p>
+                    <ul>
+                        <li><strong>구체적인 프롬프트 작성:</strong> 
+                            <ul>
+                                <li>나쁜 예: "함수 만들어줘"</li>
+                                <li>좋은 예: "React 컴포넌트에서 사용할 이메일 유효성 검사 함수를 TypeScript로 작성해줘. 정규식을 사용하고 에러 메시지도 포함해줘"</li>
+                            </ul>
+                        </li>
+                        <li><strong>@심볼 적극 활용:</strong> @Codebase, @Files, @Docs 등으로 컨텍스트 명확히 제공</li>
+                        <li><strong>단계적 질문:</strong> 복잡한 작업은 여러 단계로 나누어 질문</li>
+                        <li><strong>예시 제공:</strong> 원하는 결과물의 구체적인 예시나 기존 코드 패턴 제시</li>
+                        <li><strong>제약사항 명시:</strong> 성능, 보안, 호환성 등의 요구사항 명확히 전달</li>
+                        <li><strong>검증 요청:</strong> "이 코드가 맞는지 확인해줘" 등의 검토 단계 포함</li>
+                    </ul>
+                    
+                    <h4 id="section-8-2-3">8.2.3 네트워크 및 기술적 이슈</h4>
+                    <p><strong>문제 현상:</strong></p>
+                    <ul>
+                        <li>AI 응답이 중간에 끊어지거나 로딩만 계속됨</li>
+                        <li>"Unable to connect" 또는 "Network timeout" 에러 발생</li>
+                        <li>간헐적으로 AI 기능이 작동하지 않음</li>
+                        <li>채팅 입력 후 응답이 오지 않는 상황</li>
+                        <li>HTTP/2 호환성 문제로 인한 연결 실패</li>
+                        <li>VPN/프록시 환경에서의 접속 제한</li>
+                        <li>방화벽이나 보안 소프트웨어의 차단</li>
+                    </ul>
+                    
+                    <p><strong>원인 분석:</strong></p>
+                    <ul>
+                        <li><strong>네트워크 환경:</strong> 불안정한 인터넷 연결이나 대역폭 부족</li>
+                        <li><strong>보안 정책:</strong> 회사 방화벽이나 보안 소프트웨어의 AI 서비스 차단</li>
+                        <li><strong>프로토콜 문제:</strong> HTTP/2, TLS 버전 호환성 이슈</li>
+                        <li><strong>DNS 문제:</strong> Cursor AI 서버 도메인 해석 실패</li>
+                        <li><strong>서버 과부하:</strong> AI 서비스 서버의 일시적 과부하 상태</li>
+                    </ul>
+                    
                     <table>
                         <thead>
                             <tr>
@@ -1052,8 +1118,163 @@ document<span class="token punctuation">.</span><span class="token function">get
                                 <td>네트워크 설정 검토</td>
                                 <td>프록시 우회 설정 또는 화이트리스트 추가</td>
                             </tr>
+                            <tr>
+                                <td>캐시 오류</td>
+                                <td>브라우저 캐시 상태 점검</td>
+                                <td>캐시 및 쿠키 삭제</td>
+                            </tr>
+                            <tr>
+                                <td>방화벽 차단</td>
+                                <td>방화벽 로그 확인</td>
+                                <td>Cursor AI 도메인 화이트리스트 추가</td>
+                            </tr>
+                            <tr>
+                                <td>DNS 문제</td>
+                                <td>nslookup 명령어로 확인</td>
+                                <td>DNS 서버 변경 (8.8.8.8, 1.1.1.1)</td>
+                            </tr>
                         </tbody>
                     </table>
+                    
+                    <h4 id="section-8-2-4">8.2.4 키보드 단축키 충돌 문제</h4>
+                    <p><strong>문제 현상:</strong></p>
+                    <ul>
+                        <li>Ctrl+L, Ctrl+K 등의 단축키가 작동하지 않음</li>
+                        <li>다른 프로그램의 단축키와 충돌 발생</li>
+                        <li>운영체제 기본 단축키와 중복</li>
+                        <li>확장 프로그램 간 단축키 충돌</li>
+                        <li>예상과 다른 동작 실행</li>
+                        <li>단축키 입력 시 무반응 상태</li>
+                    </ul>
+                    
+                    <p><strong>원인 분석:</strong></p>
+                    <ul>
+                        <li><strong>시스템 우선순위:</strong> OS 전역 단축키가 Cursor보다 높은 우선순위</li>
+                        <li><strong>프로그램 간 충돌:</strong> 다른 IDE나 에디터의 단축키 설정이 우선 적용</li>
+                        <li><strong>확장 프로그램:</strong> VS Code 확장 프로그램과의 키 바인딩 충돌</li>
+                        <li><strong>언어 설정:</strong> 입력기(IME)와의 충돌</li>
+                        <li><strong>하드웨어 문제:</strong> 특정 키보드나 키 조합의 하드웨어적 제약</li>
+                    </ul>
+                    
+                    <p><strong>해결방안:</strong></p>
+                    <ul>
+                        <li><strong>키 바인딩 재설정:</strong> 
+                            <ul>
+                                <li>Ctrl+Shift+P → "Preferences: Open Keyboard Shortcuts"</li>
+                                <li>충돌하는 키 조합 확인 및 변경</li>
+                                <li>사용자 정의 키 바인딩 생성</li>
+                            </ul>
+                        </li>
+                        <li><strong>시스템 단축키 확인:</strong> 
+                            <ul>
+                                <li>Windows: 설정 → 접근성 → 키보드</li>
+                                <li>macOS: 시스템 환경설정 → 키보드 → 단축키</li>
+                                <li>Linux: 시스템 설정 → 키보드 → 바로가기</li>
+                            </ul>
+                        </li>
+                        <li><strong>확장 프로그램 관리:</strong> 
+                            <ul>
+                                <li>충돌 가능한 AI 관련 확장 프로그램 비활성화</li>
+                                <li>키 바인딩 우선순위 조정</li>
+                                <li>단계적 활성화로 원인 확인</li>
+                            </ul>
+                        </li>
+                        <li><strong>대안 키 조합:</strong> Ctrl 대신 Alt 또는 Shift+Alt 조합으로 변경</li>
+                    </ul>
+                    
+                    <h4 id="section-8-2-5">8.2.5 AI 모델별 성능 차이 문제</h4>
+                    <p><strong>문제 현상:</strong></p>
+                    <ul>
+                        <li>특정 모델에서 코딩 품질이 현저히 떨어짐</li>
+                        <li>응답 속도가 모델별로 큰 차이</li>
+                        <li>같은 질문에 대해 모델별로 상반된 답변</li>
+                        <li>특정 프로그래밍 언어에 대한 이해도 차이</li>
+                        <li>복잡한 로직에서 일부 모델의 한계 노출</li>
+                        <li>최신 기술 스택에 대한 지식 격차</li>
+                    </ul>
+                    
+                    <p><strong>원인 분석:</strong></p>
+                    <ul>
+                        <li><strong>훈련 데이터 차이:</strong> 각 AI 모델의 학습 데이터와 특화 영역이 다름</li>
+                        <li><strong>아키텍처 차이:</strong> 모델별 컨텍스트 윈도우 크기와 처리 방식 차이</li>
+                        <li><strong>최적화 방향:</strong> 추론 방식과 최적화 알고리즘의 차이</li>
+                        <li><strong>업데이트 주기:</strong> 최신 기술 스택에 대한 학습 시기 차이</li>
+                        <li><strong>특화 분야:</strong> 각 모델이 강점을 보이는 도메인이 다름</li>
+                    </ul>
+                    
+                    <p><strong>해결방안:</strong></p>
+                    <ul>
+                        <li><strong>작업별 최적 모델 선택:</strong> 
+                            <ul>
+                                <li>복잡한 알고리즘, 디버깅: Claude 4 Sonnet (정확도 89%)</li>
+                                <li>창의적 문제해결, UI/UX: GPT-5 (AGI급 추론)</li>
+                                <li>빠른 응답이 필요한 작업: Grok 3 (1-2초 응답)</li>
+                                <li>대용량 컨텍스트: Gemini 2.5 Pro (2M 토큰)</li>
+                            </ul>
+                        </li>
+                        <li><strong>A/B 테스트 진행:</strong> 같은 질문을 다른 모델에 요청하여 결과 비교</li>
+                        <li><strong>프롬프트 최적화:</strong> 각 모델의 특성에 맞는 질문 방식 적용</li>
+                        <li><strong>품질 검증:</strong> 생성된 코드의 품질을 다른 모델로 검토</li>
+                        <li><strong>모델 조합 활용:</strong> 설계는 GPT-5, 구현은 Claude 4 등 역할 분담</li>
+                    </ul>
+                    
+                    <h4 id="section-8-2-6">8.2.6 시스템 환경 문제</h4>
+                    <p><strong>문제 현상:</strong></p>
+                    <ul>
+                        <li>Cursor가 느리게 실행되거나 자주 멈춤</li>
+                        <li>메모리 사용량이 과도하게 증가 (4GB 이상)</li>
+                        <li>대용량 프로젝트에서 AI 기능 비활성화</li>
+                        <li>배터리 소모가 급격히 증가 (노트북 환경)</li>
+                        <li>그래픽 드라이버 충돌로 인한 화면 깜빡임</li>
+                        <li>운영체제별 호환성 이슈</li>
+                        <li>디스크 I/O 병목으로 인한 응답 지연</li>
+                    </ul>
+                    
+                    <p><strong>원인 분석:</strong></p>
+                    <ul>
+                        <li><strong>하드웨어 제약:</strong> 시스템 리소스 부족 (RAM, CPU 성능)</li>
+                        <li><strong>프로젝트 규모:</strong> 너무 많은 파일이나 큰 프로젝트로 인한 부하</li>
+                        <li><strong>백그라운드 프로세스:</strong> 다른 프로그램과의 리소스 경쟁</li>
+                        <li><strong>설정 불일치:</strong> Cursor 설정이 하드웨어에 최적화되지 않음</li>
+                        <li><strong>저장장치:</strong> HDD 사용 시 느린 디스크 I/O 성능</li>
+                    </ul>
+                    
+                    <p><strong>해결방안:</strong></p>
+                    <ul>
+                        <li><strong>시스템 최적화:</strong>
+                            <ul>
+                                <li>16GB 이상 RAM 권장 (최소 8GB)</li>
+                                <li>불필요한 백그라운드 프로그램 종료</li>
+                                <li>SSD 사용 권장 (HDD 대비 3-5배 성능 향상)</li>
+                                <li>멀티코어 CPU 활용을 위한 작업 관리자 설정</li>
+                            </ul>
+                        </li>
+                        <li><strong>Cursor 설정 조정:</strong>
+                            <ul>
+                                <li>AI 기능을 특정 파일 형식(.js, .ts, .py 등)으로 제한</li>
+                                <li>자동완성 딜레이 시간 증가 (기본 1초 → 2-3초)</li>
+                                <li>대용량 파일 (1MB 이상) 자동 제외 설정</li>
+                                <li>인덱싱 범위를 핵심 소스 폴더로 제한</li>
+                            </ul>
+                        </li>
+                        <li><strong>프로젝트 최적화:</strong>
+                            <ul>
+                                <li>node_modules, .git, dist 등 대용량 폴더 제외</li>
+                                <li>workspace별로 프로젝트 분리 관리</li>
+                                <li>불필요한 파일 정리 및 .gitignore 활용</li>
+                                <li>프로젝트별 AI 기능 선택적 활성화</li>
+                            </ul>
+                        </li>
+                        <li><strong>성능 모니터링:</strong>
+                            <ul>
+                                <li>작업 관리자로 CPU, 메모리 사용률 추적</li>
+                                <li>Cursor의 개발자 도구로 성능 분석</li>
+                                <li>정기적인 캐시 정리 및 재시작</li>
+                            </ul>
+                        </li>
+                    </ul>
+                        <li><strong>시스템 재시작:</strong> 정기적인 시스템 재시작으로 리소스 초기화</li>
+                    
                 </div>
                 
                 <div id="section-8-3">
