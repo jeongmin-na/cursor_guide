@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light" style=""><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>커서(Cursor) AI 개발 도구 도입 가이드</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <style>
+        * {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            max-width: none;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e9ecef;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            padding: 10px 0px 10px 10px;
+            box-sizing: border-box;
+        }
+        
+        .sidebar h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #495057;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        
+        .toc {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .toc li {
+            margin: 0;
+            padding: 0;
+            display: block;
+            width: 100%;
+        }
+        
+        .toc a {
+            display: block;
+            padding: 8px 5px 8px 10px;
+            text-decoration: none;
+            color: #495057;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            line-height: 1.3;
+            width: 100%;
+            box-sizing: border-box;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .toc a:hover {
+            background-color: #f8f9fa;
+            color: #007bff;
+        }
+        
+        .toc .level-1 {
+            font-weight: 600;
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .toc .level-2 {
+            padding-left: 20px;
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+            margin-bottom: 2px;
+        }
+        
+        .content {
+            margin-left: 300px;
+            padding: 30px;
+            background: white;
+            min-height: 100vh;
+            max-width: 900px;
+        }
+        
+        .content h1 {
+            color: #212529;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+        }
+        
+        .content h2 {
+            color: #495057;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            font-size: 1.4rem;
+        }
+        
+        .content h3 {
+            color: #6c757d;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .content h4 {
+            color: #868e96;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 12px;
+        }
+        
+        .content table th,
+        .content table td {
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .content table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .content table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .content pre {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .content code {
+            background: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #e83e8c;
+        }
+        
+        .content pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        .content ul, .content ol {
+            padding-left: 18px;
+            margin: 12px 0;
+        }
+        
+        .content li {
+            margin: 6px 0;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        .content p {
+            line-height: 1.6;
+            margin: 12px 0;
+            color: #495057;
+            font-size: 14px;
+        }
+        
+        .content strong {
+            color: #212529;
+        }
+        
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            
+            .mobile-menu {
+                display: block;
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 101;
+                background: #007bff;
+                color: white;
+                border: none;
+                padding: 10px;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+        }
+        
+        .mobile-menu {
+            display: none;
+        }
+    </style>
+</head>
+<body style="">
+    <div class="container">
+        <button class="mobile-menu" onclick="toggleSidebar()">☰ 목차</button>
+        
+        <nav class="sidebar" id="sidebar">
+            <ul class="toc">
+                <li><a href="#section-1" class="level-1">1. 커서 AI 도구 소개</a></li>
+                <li><a href="#section-1-1" class="level-2">1.1 커서 AI란 무엇인가</a></li>
+                <li><a href="#section-1-2" class="level-2">1.2 주요 특징</a></li>
+                <li><a href="#section-1-3" class="level-2">1.3 VS Code와의 차이점</a></li>
+                <li><a href="#section-1-4" class="level-2">1.4 기존 도구와의 차별점</a></li>
+                <li><a href="#section-1-5" class="level-2">1.5 지원 기술 스택</a></li>
+                
+                <li><a href="#section-2" class="level-1">2. 설치 및 초기 설정</a></li>
+                <li><a href="#section-2-1" class="level-2">2.1 시스템 요구사항</a></li>
+                <li><a href="#section-2-2" class="level-2">2.2 설치 과정</a></li>
+                <li><a href="#section-2-3" class="level-2">2.3 VS Code 설정 가져오기</a></li>
+                
+                <li><a href="#section-3" class="level-1">3. 핵심 기능별 상세 사용법</a></li>
+                <li><a href="#section-3-1" class="level-2">3.1 AI 자동완성 (Tab 기능)</a></li>
+                <li><a href="#section-3-2" class="level-2">3.2 채팅 인터페이스 (Ctrl+L)</a></li>
+                <li><a href="#section-3-3" class="level-2">3.3 미니 프롬프트 (Ctrl+K)</a></li>
+                <li><a href="#section-3-4" class="level-2">3.4 고급 채팅 모드</a></li>
+                <li><a href="#section-3-5" class="level-2">3.5 단축키 및 빠른 작업</a></li>
+                <li><a href="#section-3-6" class="level-2">3.6 고급 @심볼 기능</a></li>
+                <li><a href="#section-3-7" class="level-2">3.7 터미널 AI 기능</a></li>
+                
+                <li><a href="#section-4" class="level-1">4. 고급 설정 및 최적화</a></li>
+                <li><a href="#section-4-1" class="level-2">4.1 프라이버시 모드</a></li>
+                <li><a href="#section-4-2" class="level-2">4.2 AI 모델 선택 및 설정</a></li>
+                <li><a href="#section-4-3" class="level-2">4.3 VS Code 확장프로그램 연동</a></li>
+                
+                <li><a href="#section-5" class="level-1">5. 실전 활용 예시</a></li>
+                <li><a href="#section-5-1" class="level-2">5.1 새 프로젝트 시작하기</a></li>
+                <li><a href="#section-5-2" class="level-2">5.2 레거시 코드 리팩토링</a></li>
+                <li><a href="#section-5-3" class="level-2">5.3 API 연동 코드 생성</a></li>
+                <li><a href="#section-5-4" class="level-2">5.4 테스트 코드 자동 생성</a></li>
+                
+                <li><a href="#section-6" class="level-1">6. 모범 사례 및 주의사항</a></li>
+                <li><a href="#section-6-1" class="level-2">6.1 효과적인 프롬프트 작성법</a></li>
+                <li><a href="#section-6-2" class="level-2">6.2 코드 품질 관리</a></li>
+                <li><a href="#section-6-3" class="level-2">6.3 팀 협업 가이드라인</a></li>
+                
+                <li><a href="#section-7" class="level-1">7. 팀 협업을 위한 설정 및 규칙</a></li>
+                <li><a href="#section-7-1" class="level-2">7.1 cursorrules 파일 활용</a></li>
+                <li><a href="#section-7-2" class="level-2">7.2 Requirements.md 작성 가이드</a></li>
+                <li><a href="#section-7-3" class="level-2">7.3 팀 역할별 활용 가이드</a></li>
+                
+                <li><a href="#section-8" class="level-1">8. 문제해결 가이드</a></li>
+                <li><a href="#section-8-1" class="level-2">8.1 일반적인 문제 및 해결방법</a></li>
+                <li><a href="#section-8-2" class="level-2">8.2 주요 문제 유형별 분석</a></li>
+                <li><a href="#section-8-3" class="level-2">8.3 트러블슈팅 체크리스트</a></li>
+                
+                <li><a href="#section-9" class="level-1">9. Cursor AI 워크플로우 완전 가이드</a></li>
+                <li><a href="#section-9-1" class="level-2">9.1 개발 모드 선택 원칙</a></li>
+                <li><a href="#section-9-2" class="level-2">9.2 일일 개발 루프 최적화</a></li>
+                <li><a href="#section-9-3" class="level-2">9.3 고급 리팩터링 방법론</a></li>
+                <li><a href="#section-9-4" class="level-2">9.4 AI 기반 코드 리뷰 시스템</a></li>
+                <li><a href="#section-9-5" class="level-2">9.5 테스트 자동화 워크플로우</a></li>
+                <li><a href="#section-9-6" class="level-2">9.6 디버깅 및 오류 해결 프로세스</a></li>
+                <li><a href="#section-9-7" class="level-2">9.7 팀 협업 및 지식 공유 최적화</a></li>
+                <li><a href="#section-9-8" class="level-2">9.8 성능 최적화 자동화</a></li>
+                <li><a href="#section-9-9" class="level-2">9.9 배포 및 DevOps 자동화</a></li>
+                <li><a href="#section-9-10" class="level-2">9.10 KPI 및 생산성 측정</a></li>
+                <li><a href="#section-9-11" class="level-2">9.11 보안 및 컴플라이언스 자동화</a></li>
+                <li><a href="#section-9-12" class="level-2">9.12 지속적 학습 및 개선 체계</a></li>
+            </ul>
+        </nav>
+        
+        <main class="content">
+            <h1>커서(Cursor) AI 개발 도구 도입 가이드</h1>
+            
+            <section id="section-1">
+                <h2>1. 커서 AI 도구 소개</h2>
+                
+                <div id="section-1-1">
+                    <h3>1.1 커서 AI란 무엇인가</h3>
+                    <p>커서(Cursor)는 AI 기술을 핵심으로 하는 통합 개발 환경(IDE)입니다. Visual Studio Code의 친숙한 인터페이스를 기반으로 하면서도, AI 어시스턴트가 내장되어 개발자와 실시간으로 협업할 수 있는 플랫폼입니다.</p>
+                </div>
+                
+                <div id="section-1-2">
+                    <h3>1.2 주요 특징</h3>
+                    <ul>
+                        <li><strong>AI 우선 설계</strong>: 단순한 플러그인이 아닌 AI가 핵심에 통합된 IDE</li>
+                        <li><strong>Visual Studio Code 기반</strong>: 기존 확장 프로그램 및 설정 완벽 호환</li>
+                        <li><strong>실시간 코드 이해</strong>: 프로젝트 전체 컨텍스트를 파악하는 AI 어시스턴트</li>
+                        <li><strong>다중 AI 모델 지원</strong>: GPT-5, Claude 4 Sonnet, Gemini 2.5 Pro, Grok 3 등 최신 모델 선택 가능</li>
+                        <li><strong>에이전트 모드</strong>: 복잡한 작업을 자동으로 수행하는 AI 에이전트</li>
+                    </ul>
+                </div>
+                
+                <div id="section-1-3">
+                    <h3>1.3 VS Code와의 차이점</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>항목</th>
+                                <th>VS Code + Copilot</th>
+                                <th>Cursor AI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>AI 통합도</td>
+                                <td>확장 프로그램 형태</td>
+                                <td>네이티브 통합</td>
+                            </tr>
+                            <tr>
+                                <td>코드베이스 이해</td>
+                                <td>제한적</td>
+                                <td>전체 프로젝트 분석</td>
+                            </tr>
+                            <tr>
+                                <td>멀티라인 편집</td>
+                                <td>기본적 수준</td>
+                                <td>고도화된 AI 예측</td>
+                            </tr>
+                            <tr>
+                                <td>컨텍스트 참조</td>
+                                <td>수동 추가</td>
+                                <td>@심볼을 통한 자동 참조</td>
+                            </tr>
+                            <tr>
+                                <td>에이전트 기능</td>
+                                <td>없음</td>
+                                <td>완전 자동화 작업 수행</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="section-1-4">
+                    <h3>1.4 기존 도구와의 차별점</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>구분</th>
+                                <th>기존 IDE</th>
+                                <th>GitHub Copilot</th>
+                                <th>Cursor AI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>AI 통합도</td>
+                                <td>플러그인 형태</td>
+                                <td>코드 완성 중심</td>
+                                <td>네이티브 AI 통합</td>
+                            </tr>
+                            <tr>
+                                <td>상호작용</td>
+                                <td>수동적</td>
+                                <td>제안 중심</td>
+                                <td>대화형 협업</td>
+                            </tr>
+                            <tr>
+                                <td>컨텍스트 범위</td>
+                                <td>파일 단위</td>
+                                <td>코드 블록 단위</td>
+                                <td>프로젝트 전체</td>
+                            </tr>
+                            <tr>
+                                <td>자동화 수준</td>
+                                <td>낮음</td>
+                                <td>중간</td>
+                                <td>높음</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="section-1-5">
+                    <h3>1.5 지원 기술 스택</h3>
+                    <p>커서 AI는 광범위한 프로그래밍 언어와 프레임워크를 지원합니다:</p>
+                    <ul>
+                        <li><strong>프로그래밍 언어</strong>: JavaScript ES2025, TypeScript 5.6+, Python 3.13+, Java 23+, C++23, Go 1.23+, Rust 1.80+ 등</li>
+                        <li><strong>웹 프레임워크</strong>: React 19, Vue.js 3.5, Angular 18, Next.js 15, Express.js 5.x 등</li>
+                        <li><strong>모바일</strong>: React Native 0.75+, Flutter 3.24+, Expo SDK 52+</li>
+                        <li><strong>데이터베이스</strong>: PostgreSQL 17, MySQL 9.x, MongoDB 8.x, Redis 7.4+ 등</li>
+                        <li><strong>클라우드</strong>: AWS 2025 서비스, Azure 최신, GCP 신규 서비스, Docker 27+, Kubernetes 1.31+</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="section-2">
+                <h2>2. 설치 및 초기 설정</h2>
+                
+                <div id="section-2-1">
+                    <h3>2.1 시스템 요구사항</h3>
+                    <ul>
+                        <li><strong>운영체제</strong>: Windows 10/11, macOS 10.15+, Linux (Ubuntu 18.04+)</li>
+                        <li><strong>메모리</strong>: 8GB RAM 이상 권장 (16GB 권장)</li>
+                        <li><strong>저장공간</strong>: 1GB 이상의 여유 공간</li>
+                        <li><strong>네트워크</strong>: AI 기능 사용을 위한 인터넷 연결 필수</li>
+                    </ul>
+                </div>
+                
+                <div id="section-2-2">
+                    <h3>2.2 설치 과정</h3>
+                    <ol>
+                        <li>Cursor 공식 웹사이트 접속</li>
+                        <li>'Download' 버튼 클릭 (운영체제 자동 감지)</li>
+                        <li>설치 파일 다운로드 및 실행</li>
+                        <li>설치 마법사 따라 진행</li>
+                        <li>Google 또는 GitHub 계정으로 로그인</li>
+                    </ol>
+                </div>
+                
+                <div id="section-2-3">
+                    <h3>2.3 VS Code 설정 가져오기</h3>
+                    <p>Cursor는 VS Code의 설정과 확장 프로그램을 자동으로 감지하여 가져올 수 있습니다:</p>
+                    <p><strong>설정 가져오기 절차:</strong></p>
+                    <ul>
+                        <li>Ctrl + Shift + J (Windows/Linux) 또는 Cmd + Shift + J (macOS) 실행</li>
+                        <li>Cursor Settings 창에서 'General &gt; Account' 메뉴 선택</li>
+                        <li>'Import VS Code Settings' 옵션 활성화</li>
+                        <li>기존 확장 프로그램 및 테마 자동 적용</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="section-3">
+                <h2>3. 핵심 기능별 상세 사용법</h2>
+                
+                <div id="section-3-1">
+                    <h3>3.1 AI 자동완성 (Tab 기능)</h3>
+                    <p>Cursor의 가장 기본적이면서 강력한 기능입니다. Copilot++라고 불리는 이 기능은 코드 작성 중 약 1초 정도 대기하면 AI가 다음에 올 코드를 예측하여 제안합니다.</p>
+                    <p><strong>사용법:</strong></p>
+                    <ul>
+                        <li>코드 작성 중 잠시 멈춤 (약 1초)</li>
+                        <li>회색으로 표시되는 AI 제안 코드 확인</li>
+                        <li>Tab 키를 눌러 제안 수락</li>
+                        <li>Esc 키로 제안 거부</li>
+                    </ul>
+                    <p><strong>실제 예시:</strong></p>
+                    <pre class="language-javascript" tabindex="0"><code class="language-javascript"><span class="token comment">// 함수명만 입력</span>
+<span class="token keyword">function</span> calculateTotalPrice
+
+<span class="token comment">// Tab 누르면 자동으로 완성됨</span>
+<span class="token keyword">function</span> <span class="token function">calculateTotalPrice</span><span class="token punctuation">(</span><span class="token parameter">items<span class="token punctuation">,</span> taxRate <span class="token operator">=</span> <span class="token number">0.1</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> subtotal <span class="token operator">=</span> items<span class="token punctuation">.</span><span class="token function">reduce</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">sum<span class="token punctuation">,</span> item</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> sum <span class="token operator">+</span> item<span class="token punctuation">.</span>price<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> tax <span class="token operator">=</span> subtotal <span class="token operator">*</span> taxRate<span class="token punctuation">;</span>
+  <span class="token keyword">return</span> subtotal <span class="token operator">+</span> tax<span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+                </div>
+                
+                <div id="section-3-2">
+                    <h3>3.2 채팅 인터페이스 (Ctrl+L)</h3>
+                    <p>전용 채팅 창을 통해 프로젝트 전체 컨텍스트를 이해하는 AI와 대화할 수 있습니다.</p>
+                    <p><strong>사용법:</strong></p>
+                    <ul>
+                        <li>Ctrl+L (Windows/Linux) 또는 Cmd+L (macOS) 실행</li>
+                        <li>질문이나 요청사항 입력</li>
+                        <li>Enter: 현재 파일 기준 답변</li>
+                        <li>Ctrl+Enter (Windows/Linux) 또는 Cmd+Enter (macOS): 전체 코드베이스 기준 답변</li>
+                    </ul>
+                    <p><strong>효과적인 질문 예시:</strong></p>
+                    <ul>
+                        <li>"이 프로젝트의 전체 아키텍처를 설명해줘"</li>
+                        <li>"데이터베이스 연결 부분에 문제가 있는 것 같은데 어디를 확인해야 할까?"</li>
+                        <li>"보안 취약점이 있을 만한 코드 부분을 찾아줘"</li>
+                        <li>"이 API 엔드포인트의 성능을 개선하는 방법은?"</li>
+                    </ul>
+                </div>
+                
+                <div id="section-3-3">
+                    <h3>3.3 미니 프롬프트 (Ctrl+K)</h3>
+                    <p>특정 코드 라인이나 블록에 대해 즉석에서 AI에게 수정이나 질문을 요청할 수 있는 기능입니다.</p>
+                    <p><strong>사용법:</strong></p>
+                    <ul>
+                        <li>수정하고 싶은 코드 블록 선택 (선택 안 하면 새 코드 생성)</li>
+                        <li>Ctrl+K (Windows/Linux) 또는 Cmd+K (macOS) 실행</li>
+                        <li>자연어로 요청사항 입력</li>
+                        <li>Ctrl+Shift+Y로 수락, Ctrl+N으로 거부</li>
+                    </ul>
+                    <p><strong>실용적인 프롬프트 예시:</strong></p>
+                    <ul>
+                        <li>"이 함수를 async/await 패턴으로 변경해줘"</li>
+                        <li>"에러 핸들링 추가해줘"</li>
+                        <li>"이 코드에 타입 안전성을 추가해줘"</li>
+                        <li>"성능을 최적화해줘"</li>
+                        <li>"이 함수의 유닛 테스트를 만들어줘"</li>
+                    </ul>
+                </div>
+                
+                <div id="section-3-4">
+                    <h3>3.4 고급 채팅 모드 (Chat with Codebase)</h3>
+                    <p>Cursor AI의 최신 버전에서는 기존의 Composer 기능이 강화된 Chat 모드로 통합되었습니다. 이 모드는 전체 코드베이스를 이해하고 복잡한 멀티파일 작업을 수행할 수 있습니다.</p>
+                    <p><strong>사용 절차:</strong></p>
+                    <ol>
+                        <li>채팅 열기: Ctrl+L로 채팅 패널 열기</li>
+                        <li>복잡한 작업 요청: 멀티파일 수정, 전체 기능 구현 등을 자연어로 요청</li>
+                        <li>AI 분석: AI가 전체 코드베이스를 분석하고 작업 계획 수립</li>
+                        <li>단계별 실행: 각 수정 단계를 확인 후 순차적으로 적용</li>
+                    </ol>
+                    <p><strong>고급 기능들:</strong></p>
+                    <ul>
+                        <li>전체 코드베이스 이해: 프로젝트 전체 구조를 파악하여 일관성 있는 수정</li>
+                        <li>스마트 파일 선택: 작업에 필요한 파일들을 AI가 자동으로 식별 및 수정</li>
+                        <li>의존성 추적: 변경사항이 다른 파일에 미치는 영향 자동 분석</li>
+                        <li>변경사항 미리보기: 실제 적용 전 변경되는 내용 확인 가능</li>
+                        <li>안전한 적용: 각 단계마다 확인 및 승인 과정</li>
+                    </ul>
+                </div>
+                
+                <div id="section-3-5">
+                    <h3>3.5 단축키 및 빠른 작업</h3>
+                    <p>Cursor AI의 최신 버전에서는 다양한 단축키와 빠른 작업 기능이 강화되었습니다.</p>
+                    <p><strong>주요 단축키:</strong></p>
+                    <ul>
+                        <li>Ctrl+Shift+L: 새 채팅 세션 시작</li>
+                        <li>Ctrl+I: 인라인 편집 모드 (커서 모드)</li>
+                        <li>Ctrl+Shift+I: 전체 코드베이스와 채팅</li>
+                        <li>Ctrl+Enter: 코드 수락 (채팅에서 AI 제안 수락 시)</li>
+                        <li>Esc: 제안 거부 또는 모드 종료</li>
+                    </ul>
+                    <p><strong>인라인 편집 모드 (Ctrl+I):</strong></p>
+                    <ul>
+                        <li>코드 라인에서 직접 AI에게 수정 요청</li>
+                        <li>특정 라인이나 블록을 선택한 상태에서 사용</li>
+                        <li>빠른 코드 수정 및 리팩토링에 적합</li>
+                        <li>수정 전후 비교 및 선택적 적용 가능</li>
+                    </ul>
+                </div>
+                
+                <div id="section-3-6">
+                    <h3>3.6 고급 @심볼 기능</h3>
+                    <p>Cursor의 강력한 컨텍스트 참조 시스템으로, 다양한 정보 소스를 AI가 참조할 수 있도록 합니다.</p>
+                    
+                    <h4>3.6.1 @Codebase</h4>
+                    <p>전체 프로젝트 코드를 스캔하여 답변을 제공합니다. 최대 200k 토큰까지 처리 가능합니다.</p>
+                    <pre><code>@Codebase 이 프로젝트에서 사용자 인증은 어떻게 구현되어 있나?</code></pre>
+                    
+                    <h4>3.6.2 @Docs (확장된 활용)</h4>
+                    <p>인기 라이브러리의 공식 문서나 사용자가 추가한 문서를 참조합니다. 현재 500+ 개의 문서가 사전 인덱싱되어 있습니다.</p>
+                    <p><strong>사전 인덱싱된 주요 문서:</strong></p>
+                    <ul>
+                        <li>React 19, Next.js 15, Vue.js 3.5, Angular 18 최신 문서</li>
+                        <li>TypeScript 5.6+, JavaScript ES2025 문서</li>
+                        <li>Python (3.13+), Django 5.x, FastAPI 0.115+ 문서</li>
+                        <li>Node.js 23, Express.js 5.x, NestJS 10+ 문서</li>
+                        <li>AWS, Google Cloud, Azure 2025 최신 서비스 문서</li>
+                    </ul>
+                    <pre><code>@React React 19의 새로운 Compiler와 Suspense 개선사항에 대해 설명해줘</code></pre>
+                    
+                    <h4>3.6.3 @Web</h4>
+                    <p>실시간 인터넷 검색을 통해 최신 정보를 제공합니다. 검색 속도가 대폭 개선되었습니다.</p>
+                    <pre><code>@Web TypeScript 5.6과 JavaScript ES2025의 새로운 기능은 뭐야?</code></pre>
+                    
+                    <h4>3.6.4 @Files (새 기능)</h4>
+                    <p>프로젝트 내 특정 파일들을 선택적으로 참조할 수 있습니다.</p>
+                    <pre><code>@Files package.json tsconfig.json 이 설정들을 분석해서 최적화 방안을 제시해줘</code></pre>
+                    
+                    <h4>3.6.5 @Folders (새 기능)</h4>
+                    <p>특정 폴더의 모든 파일을 컨텍스트로 포함시킬 수 있습니다.</p>
+                    <pre><code>@Folders src/components src/utils 이 폴더들의 코드 일관성을 검토해줘</code></pre>
+                </div>
+                
+                <div id="section-3-7">
+                    <h3>3.7 터미널 AI 기능 (Cursor Terminal)</h3>
+                    <p>터미널에서도 AI의 도움을 받을 수 있습니다. 2025년부터 더욱 강화된 터미널 통합 기능을 제공합니다.</p>
+                    <p><strong>사용법:</strong></p>
+                    <p>터미널에서 Ctrl+K (Windows/Linux) 또는 Cmd+K (macOS)를 누르고 자연어로 원하는 명령어를 설명하면 AI가 적절한 터미널 명령어로 변환해줍니다.</p>
+                    <p><strong>터미널 AI 기능들:</strong></p>
+                    <ul>
+                        <li>명령어 자동 완성: 터미널에서도 Tab 자동완성 지원</li>
+                        <li>실시간 에러 분석: 명령어 실행 실패 시 즉시 원인 분석 및 해결책 제시</li>
+                        <li>환경 인식: 현재 디렉터리와 프로젝트 컨텍스트를 이해한 명령어 제안</li>
+                        <li>대화형 명령어: 채팅 내에서 터미널 동작 직접 요청 및 실행</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="section-4">
+                <h2>4. 고급 설정 및 최적화</h2>
+                
+                <div id="section-4-1">
+                    <h3>4.1 프라이버시 모드</h3>
+                    <p>민감한 코드나 기업 환경에서 사용할 때 데이터 보안을 강화하는 기능입니다.</p>
+                    <p><strong>설정 방법:</strong></p>
+                    <ul>
+                        <li>Ctrl+Shift+J 실행하여 Cursor Settings 열기</li>
+                        <li>'General &gt; Privacy Mode' 메뉴 선택</li>
+                        <li>'Enable Privacy Mode' 옵션 활성화</li>
+                        <li>필요시 특정 파일이나 디렉터리를 제외 목록에 추가</li>
+                    </ul>
+                    <p><strong>주의사항:</strong> 프라이버시 모드 활성화 시 AI의 성능이 다소 제한될 수 있으며, 일부 고급 기능이 제한될 수 있습니다.</p>
+                </div>
+                
+                <div id="section-4-2">
+                    <h3>4.2 AI 모델 선택 및 설정 (2025년 9월 최신 가이드)</h3>
+                    <p>2025년 현재 Cursor는 시장에서 가장 강력한 4개의 AI 모델을 지원합니다. 각 모델은 고유한 강점을 가지고 있어 작업 특성에 따라 최적의 선택이 가능합니다.</p>
+                    
+                    <h4>4.2.1 Claude 4 Sonnet: 개발자를 위한 최강 모델</h4>
+                    <p><strong>핵심 특징:</strong></p>
+                    <ul>
+                        <li>컨텍스트 윈도우: 200K 토큰 (약 150,000 단어)</li>
+                        <li>코딩 정확도: 89% (업계 최고 수준)</li>
+                        <li>응답 속도: 평균 2-3초</li>
+                        <li>강점: 복잡한 알고리즘, 디버깅, 코드 리뷰</li>
+                    </ul>
+                    
+                    <h4>4.2.2 GPT-5: AGI 수준의 추론 능력</h4>
+                    <p><strong>핵심 특징:</strong></p>
+                    <ul>
+                        <li>컨텍스트 윈도우: 400K 토큰 (Claude보다 2배)</li>
+                        <li>멀티모달: 텍스트, 이미지, 코드 통합 처리</li>
+                        <li>추론 능력: AGI 수준의 논리적 사고</li>
+                        <li>강점: 창의적 문제해결, UI/UX 구현, 복합 작업</li>
+                    </ul>
+                    
+                    <h4>4.2.3 모델별 성능 벤치마크 비교</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>평가 항목</th>
+                                <th>Claude 4 Sonnet</th>
+                                <th>GPT-5</th>
+                                <th>Grok 3</th>
+                                <th>Gemini 2.5 Pro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>코딩 정확도</td>
+                                <td><strong>89%</strong></td>
+                                <td>85%</td>
+                                <td>78%</td>
+                                <td>87%</td>
+                            </tr>
+                            <tr>
+                                <td>응답 속도</td>
+                                <td>2-3초</td>
+                                <td>3-4초</td>
+                                <td><strong>1-2초</strong></td>
+                                <td>2-5초</td>
+                            </tr>
+                            <tr>
+                                <td>컨텍스트 처리</td>
+                                <td>200K</td>
+                                <td>400K</td>
+                                <td>100K</td>
+                                <td><strong>2M</strong></td>
+                            </tr>
+                            <tr>
+                                <td>창의적 문제해결</td>
+                                <td>85%</td>
+                                <td><strong>92%</strong></td>
+                                <td>88%</td>
+                                <td>82%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="section-4-3">
+                    <h3>4.3 VS Code 확장프로그램 연동</h3>
+                    <p>기존 VS Code 확장프로그램을 Cursor에서 그대로 사용할 수 있습니다.</p>
+                    <p><strong>권장 확장프로그램 (2025 업데이트):</strong></p>
+                    <ul>
+                        <li><strong>Biome</strong>: 새로운 표준 린터/포맷터 (고성능, ESLint+Prettier 대체)</li>
+                        <li><strong>Oxc</strong>: 초고속 Rust 기반 린터 (차세대 린팅 도구)</li>
+                        <li><strong>GitLens</strong>: Git 히스토리 및 블레임 관리</li>
+                        <li><strong>Bruno</strong>: API 테스팅 (오픈 소스 Postman 대안)</li>
+                        <li><strong>Dev Containers</strong>: 컨테이너 기반 개발 환경 (도커 통합)</li>
+                        <li><strong>GitHub Actions</strong>: CI/CD 워크플로우 및 자동화</li>
+                        <li><strong>Tauri v2</strong>: 차세대 데스크톱 앱 개발 (네이티브 성능)</li>
+                        <li><strong>Vite</strong>: 최신 빌드 도구 지원 (HMR 및 에셋 최적화)</li>
+                    </ul>
+                    <p><strong>최적화 팁:</strong> Cursor의 AI 기능과 충돌할 수 있는 다른 AI 코딩 어시스턴트 확장프로그램(예: GitHub Copilot)은 비활성화하는 것이 좋습니다.</p>
+                </div>
+            </section>
+            
+            <section id="section-5">
+                <h2>5. 실전 활용 예시</h2>
+                
+                <div id="section-5-1">
+                    <h3>5.1 새 프로젝트 시작하기</h3>
+                    <p><strong>시나리오:</strong> React + TypeScript로 할 일 관리 앱 만들기</p>
+                    <pre><code>// 1. 채팅창에 요청 (Composer v2 활용)
+"React 19와 TypeScript로 할 일 관리 앱의 기본 구조를 만들어줘. 
+컴포넌트는 TodoList, TodoItem, AddTodo로 구성하고 
+React Compiler 최적화도 적용해줘. 상태관리는 useState를 사용해줘"
+
+// 2. 에이전트가 자동으로 수행하는 작업:
+// - 필요한 파일 구조 생성
+// - 컴포넌트 파일들 생성
+// - 기본 스타일링 추가
+// - 타입 정의 파일 생성</code></pre>
+                </div>
+                
+                <div id="section-5-2">
+                    <h3>5.2 레거시 코드 리팩토링</h3>
+                    <p><strong>시나리오:</strong> jQuery로 작성된 코드를 바닐라 JavaScript로 변환</p>
+                    <pre class="language-javascript" tabindex="0"><code class="language-javascript"><span class="token comment">// 기존 jQuery 코드</span>
+<span class="token function">$</span><span class="token punctuation">(</span><span class="token string">'#submit-btn'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">on</span><span class="token punctuation">(</span><span class="token string">'click'</span><span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">var</span> name <span class="token operator">=</span> <span class="token function">$</span><span class="token punctuation">(</span><span class="token string">'#name-input'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">val</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>name<span class="token punctuation">.</span>length <span class="token operator">&gt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">$</span><span class="token punctuation">(</span><span class="token string">'#result'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">html</span><span class="token punctuation">(</span><span class="token string">'Hello, '</span> <span class="token operator">+</span> name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Ctrl+K로 "jQuery를 바닐라 JavaScript로 변환해줘"</span>
+<span class="token comment">// 자동 변환 결과:</span>
+document<span class="token punctuation">.</span><span class="token function">getElementById</span><span class="token punctuation">(</span><span class="token string">'submit-btn'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'click'</span><span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> name <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">getElementById</span><span class="token punctuation">(</span><span class="token string">'name-input'</span><span class="token punctuation">)</span><span class="token punctuation">.</span>value<span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>name<span class="token punctuation">.</span>length <span class="token operator">&gt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    document<span class="token punctuation">.</span><span class="token function">getElementById</span><span class="token punctuation">(</span><span class="token string">'result'</span><span class="token punctuation">)</span><span class="token punctuation">.</span>innerHTML <span class="token operator">=</span> <span class="token string">'Hello, '</span> <span class="token operator">+</span> name<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+                </div>
+                
+                <div id="section-5-3">
+                    <h3>5.3 API 연동 코드 생성</h3>
+                    <p><strong>시나리오:</strong> REST API를 통한 사용자 데이터 CRUD 구현</p>
+                    <pre class="language-javascript" tabindex="0"><code class="language-javascript"><span class="token comment">// 프롬프트: "사용자 데이터 CRUD를 위한 API 서비스 클래스를 만들어줘. </span>
+<span class="token comment">// fetch를 사용하고 에러 핸들링도 포함해줘"</span>
+
+<span class="token keyword">class</span> <span class="token class-name">UserService</span> <span class="token punctuation">{</span>
+  <span class="token keyword">private</span> baseUrl <span class="token operator">=</span> <span class="token string">'https://api.example.com/users'</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">async</span> <span class="token function">getUsers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Promise <span class="token punctuation">{</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+      <span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>baseUrl<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>response<span class="token punctuation">.</span>ok<span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'Failed to fetch users'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">return</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">'Error fetching users:'</span><span class="token punctuation">,</span> error<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">throw</span> error<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">async</span> <span class="token function">createUser</span><span class="token punctuation">(</span>user<span class="token operator">:</span> Partial<span class="token punctuation">)</span><span class="token operator">:</span> Promise <span class="token punctuation">{</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+      <span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>baseUrl<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+        <span class="token literal-property property">method</span><span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span>
+        <span class="token literal-property property">headers</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token string-property property">'Content-Type'</span><span class="token operator">:</span> <span class="token string">'application/json'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token literal-property property">body</span><span class="token operator">:</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>response<span class="token punctuation">.</span>ok<span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'Failed to create user'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">return</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">'Error creating user:'</span><span class="token punctuation">,</span> error<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">throw</span> error<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+  <span class="token comment">// ... 나머지 CRUD 메서드들</span>
+<span class="token punctuation">}</span></code></pre>
+                </div>
+                
+                <div id="section-5-4">
+                    <h3>5.4 테스트 코드 자동 생성</h3>
+                    <p><strong>시나리오:</strong> 유틸리티 함수에 대한 Jest 테스트 생성</p>
+                    <pre class="language-javascript" tabindex="0"><code class="language-javascript"><span class="token comment">// 원본 함수</span>
+<span class="token keyword">function</span> <span class="token function">formatCurrency</span><span class="token punctuation">(</span>amount<span class="token operator">:</span> number<span class="token punctuation">,</span> <span class="token literal-property property">currency</span><span class="token operator">:</span> string <span class="token operator">=</span> <span class="token string">'USD'</span><span class="token punctuation">)</span><span class="token operator">:</span> string <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Intl<span class="token punctuation">.</span>NumberFormat</span><span class="token punctuation">(</span><span class="token string">'en-US'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">style</span><span class="token operator">:</span> <span class="token string">'currency'</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">currency</span><span class="token operator">:</span> currency
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">format</span><span class="token punctuation">(</span>amount<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// 함수 선택 후 Ctrl+K로 "이 함수의 Vitest 테스트를 만들어줘"</span>
+<span class="token function">describe</span><span class="token punctuation">(</span><span class="token string">'formatCurrency'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  <span class="token function">test</span><span class="token punctuation">(</span><span class="token string">'should format USD currency correctly'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span><span class="token function">formatCurrency</span><span class="token punctuation">(</span><span class="token number">1234.56</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span><span class="token string">'$1,234.56'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">test</span><span class="token punctuation">(</span><span class="token string">'should handle zero amount'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span><span class="token function">formatCurrency</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span><span class="token string">'$0.00'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">test</span><span class="token punctuation">(</span><span class="token string">'should format different currencies'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span><span class="token function">formatCurrency</span><span class="token punctuation">(</span><span class="token number">1000</span><span class="token punctuation">,</span> <span class="token string">'EUR'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span><span class="token string">'€1,000.00'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">test</span><span class="token punctuation">(</span><span class="token string">'should handle negative amounts'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span><span class="token function">formatCurrency</span><span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">500</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span><span class="token string">'-$500.00'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+                </div>
+            </section>
+            
+            <section id="section-6">
+                <h2>6. 모범 사례 및 주의사항</h2>
+                
+                <div id="section-6-1">
+                    <h3>6.1 효과적인 프롬프트 작성법</h3>
+                    <p><strong>좋은 프롬프트의 특징:</strong></p>
+                    <ul>
+                        <li><strong>구체적</strong>: "버그 고쳐줘" → "null 값 처리를 위한 방어 코드 추가해줘"</li>
+                        <li><strong>맥락 포함</strong>: 사용 중인 기술 스택, 요구사항 명시</li>
+                        <li><strong>예시 제공</strong>: 원하는 결과물의 구체적인 예시 포함</li>
+                        <li><strong>제약사항 명시</strong>: 성능, 보안, 호환성 등의 제약사항</li>
+                    </ul>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>나쁜 예시</th>
+                                <th>좋은 예시</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>"함수 만들어줘"</td>
+                                <td>"사용자 입력을 검증하는 함수를 TypeScript로 만들어줘. 이메일, 비밀번호 길이, 필수 필드를 체크해야 해"</td>
+                            </tr>
+                            <tr>
+                                <td>"최적화해줘"</td>
+                                <td>"이 배열 정렬 함수의 시간 복잡도를 O(n log n)으로 최적화하고 메모리 사용량도 줄여줘"</td>
+                            </tr>
+                            <tr>
+                                <td>"에러 고쳐줘"</td>
+                                <td>"async/await 사용 시 발생하는 Promise rejection 에러를 try-catch로 처리해줘"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="section-6-2">
+                    <h3>6.2 코드 품질 관리</h3>
+                    <p><strong>중요한 주의사항:</strong></p>
+                    <ul>
+                        <li><strong>맹목적 수용 금지</strong>: AI가 생성한 코드를 반드시 검토하고 이해한 후 사용</li>
+                        <li><strong>테스트 필수</strong>: 자동 생성된 코드도 반드시 테스트 진행</li>
+                        <li><strong>보안 검토</strong>: 특히 사용자 입력, 데이터베이스 쿼리 관련 코드는 보안 검토 필수</li>
+                        <li><strong>성능 최적화</strong>: 복잡한 알고리즘은 성능 프로파일링 진행</li>
+                    </ul>
+                </div>
+                
+                <div id="section-6-3">
+                    <h3>6.3 팀 협업 가이드라인</h3>
+                    <p><strong>팀에서 Cursor 도입 시 권장사항:</strong></p>
+                    <ul>
+                        <li><strong>코딩 스타일 통일</strong>: ESLint, Prettier 설정을 팀 전체가 공유</li>
+                        <li><strong>AI 사용 가이드라인</strong>: 어떤 작업에 AI를 사용할지 팀 내 합의</li>
+                        <li><strong>코드 리뷰 프로세스</strong>: AI 생성 코드에 대한 별도의 리뷰 프로세스 구축</li>
+                        <li><strong>문서화 강화</strong>: AI가 생성한 복잡한 로직은 추가 문서화 진행</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="section-7">
+                <h2>7. 팀 협업을 위한 설정 및 규칙</h2>
+                
+                <div id="section-7-1">
+                    <h3>7.1 cursorrules 파일 활용 (향상된 규칙 시스템)</h3>
+                    <p>팀 전체가 일관된 코딩 스타일과 규칙을 따르도록 하는 핵심 기능입니다. 강력한 규칙 시스템으로 AI의 동작을 세밀하게 제어할 수 있습니다.</p>
+                    <p><strong>고급 규칙 기능들:</strong></p>
+                    <ul>
+                        <li>조건부 규칙: 파일 타입별, 프로젝트별 다른 규칙 적용</li>
+                        <li>규칙 상속: 글로벌 규칙을 프로젝트별로 확장</li>
+                        <li>실시간 검증: 규칙 위반 시 즉시 알림</li>
+                        <li>규칙 템플릿: 인기 프레임워크별 사전 정의된 규칙</li>
+                    </ul>
+                    <pre><code># .cursorrules 파일 예시
+# 기술 스택 정의
+사용 기술 스택:
+- React 19.x (Compiler 활성화)
+- TypeScript 5.6.x
+- Tailwind CSS 4.x
+- Node.js 23.x LTS
+- PostgreSQL 17.x
+
+# 코딩 컨벤션
+코드 스타일:
+- 모든 컴포넌트는 함수형으로 작성
+- 파일명은 PascalCase 사용 (MyComponent.tsx)
+- 변수/함수명은 camelCase 사용
+- 상수는 UPPER_SNAKE_CASE 사용
+- 들여쓰기는 공백 2개 사용
+
+# 품질 기준
+코드 품질:
+- 함수는 최대 50줄 이내로 제한
+- 순환 복잡도 10 이하 유지
+- 테스트 커버리지 80% 이상
+- 모든 public 함수에 JSDoc 주석 필수</code></pre>
+                </div>
+                
+                <div id="section-7-2">
+                    <h3>7.2 Requirements.md 작성 가이드</h3>
+                    <p>프로젝트 요구사항을 체계적으로 관리하는 문서입니다.</p>
+                    <p><strong>필수 포함 항목:</strong></p>
+                    <ul>
+                        <li><strong>프로젝트 개요</strong>: 목적, 범위, 주요 기능</li>
+                        <li><strong>기술 아키텍처</strong>: 시스템 구조, 기술 스택</li>
+                        <li><strong>개발 환경</strong>: 개발 도구, 빌드 프로세스</li>
+                        <li><strong>배포 전략</strong>: CI/CD 파이프라인, 환경 구성</li>
+                        <li><strong>품질 기준</strong>: 코드 품질, 성능 요구사항</li>
+                        <li><strong>보안 정책</strong>: 인증/인가, 데이터 보호</li>
+                        <li><strong>협업 규칙</strong>: 코드 리뷰, 브랜치 전략</li>
+                    </ul>
+                </div>
+                
+                <div id="section-7-3">
+                    <h3>7.3 팀 역할별 활용 가이드</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>역할</th>
+                                <th>주요 활용 기능</th>
+                                <th>추천 워크플로우</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>시니어 개발자</td>
+                                <td>Agent 모드, 컴포저, 아키텍처 리뷰</td>
+                                <td>복잡한 기능 설계 → AI 검토 → 구현 가이드</td>
+                            </tr>
+                            <tr>
+                                <td>주니어 개발자</td>
+                                <td>채팅, 자동완성, 학습 지원</td>
+                                <td>질문 → AI 설명 → 코드 작성 → 리뷰</td>
+                            </tr>
+                            <tr>
+                                <td>QA 엔지니어</td>
+                                <td>테스트 자동화, 버그 분석</td>
+                                <td>테스트 케이스 생성 → 자동 실행 → 결과 분석</td>
+                            </tr>
+                            <tr>
+                                <td>팀 리더</td>
+                                <td>프로젝트 분석, 규칙 설정</td>
+                                <td>요구사항 정의 → 규칙 설정 → 진행 모니터링</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <section id="section-8">
+                <h2>8. 문제해결 가이드</h2>
+                
+                <div id="section-8-1">
+                    <h3>8.1 일반적인 문제 및 해결방법</h3>
+                    <p><strong>채팅 응답 지연/중단 문제:</strong></p>
+                    <p>해결 순서:</p>
+                    <ol>
+                        <li>즉시 복구: 커서 재시작 (Ctrl+Shift+P → "Reload Window")</li>
+                        <li>네트워크 확인: 인터넷 연결 상태 점검</li>
+                        <li>새 채팅 시작: 기존 채팅 세션 종료 후 새로 시작</li>
+                        <li>캐시 삭제: 사용자 데이터 폴더의 캐시 파일 삭제</li>
+                        <li>확장 프로그램: 충돌 가능한 확장 프로그램 비활성화</li>
+                    </ol>
+                    
+                    <p><strong>컨텍스트 길이 초과 문제:</strong></p>
+                    <p>예방 및 해결책:</p>
+                    <ul>
+                        <li>대화 요약: 주기적으로 대화 내용을 요약하여 압축</li>
+                        <li>세션 분리: 주제별로 새로운 채팅 세션 생성</li>
+                        <li>프롬프트 최적화: 불필요한 설명 제거, 핵심만 포함</li>
+                        <li>단계별 처리: 복잡한 작업을 여러 단계로 분할</li>
+                    </ul>
+                </div>
+                
+                <div id="section-8-2">
+                    <h3>8.2 주요 문제 유형별 분석</h3>
+                    <h4>8.2.1 채팅 컨텍스트 길이 문제</h4>
+                    <p><strong>문제 현상:</strong></p>
+                    <ul>
+                        <li>대화가 길어질수록 AI 응답 속도 저하</li>
+                        <li>컨텍스트 한계 도달 시 응답 중단 또는 오류 발생</li>
+                        <li>토큰 제한 초과로 인한 기능 제한</li>
+                    </ul>
+                    
+                    <p><strong>해결방안:</strong></p>
+                    <ul>
+                        <li>대화 요약 기능 활용: 주기적으로 대화 내용을 요약하여 핵심 정보만 유지</li>
+                        <li>새 채팅 세션 시작: 일정 길이 이상 누적 시 새로운 세션으로 전환</li>
+                        <li>프롬프트 최적화: 불필요한 배경 설명 제거, 핵심 질문만 포함</li>
+                    </ul>
+                    
+                    <h4>8.2.2 네트워크 및 기술적 이슈</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>문제 유형</th>
+                                <th>진단 방법</th>
+                                <th>해결책</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>연결 실패</td>
+                                <td>네트워크 상태 확인</td>
+                                <td>인터넷 연결 점검, DNS 설정 변경</td>
+                            </tr>
+                            <tr>
+                                <td>HTTP/2 이슈</td>
+                                <td>브라우저 개발자 도구 확인</td>
+                                <td>HTTP/2 비활성화 설정</td>
+                            </tr>
+                            <tr>
+                                <td>프록시 문제</td>
+                                <td>네트워크 설정 검토</td>
+                                <td>프록시 우회 설정 또는 화이트리스트 추가</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="section-8-3">
+                    <h3>8.3 트러블슈팅 체크리스트</h3>
+                    <p><strong>기본 점검사항:</strong></p>
+                    <ul>
+                        <li>인터넷 연결 상태 확인</li>
+                        <li>커서 버전 최신화</li>
+                        <li>시스템 리소스 사용량 점검</li>
+                        <li>방화벽 및 보안 소프트웨어 설정 확인</li>
+                        <li>프로젝트 파일 권한 확인</li>
+                        <li>로그 파일 검토</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <section id="section-9">
+                <h2>9. Cursor AI 워크플로우 완전 가이드</h2>
+                
+                <div id="section-9-1">
+                    <h3>9.1 개발 모드 선택 원칙과 효율성 극대화</h3>
+                    <p>개발 상황에 따른 최적의 Cursor AI 모드 선택으로 생산성을 3-5배 향상시킬 수 있습니다.</p>
+                    
+                    <h4>9.1.1 상황별 모드 매칭 매트릭스</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>개발 상황</th>
+                                <th>최적 모드</th>
+                                <th>효율성 점수</th>
+                                <th>예상 시간 단축</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>새로운 기능 개발</td>
+                                <td>Chat (Ctrl+L)</td>
+                                <td>⭐⭐⭐⭐⭐</td>
+                                <td>70-80%</td>
+                            </tr>
+                            <tr>
+                                <td>기존 코드 수정</td>
+                                <td>Mini Prompt (Ctrl+K)</td>
+                                <td>⭐⭐⭐⭐⭐</td>
+                                <td>60-70%</td>
+                            </tr>
+                            <tr>
+                                <td>복잡한 리팩터링</td>
+                                <td>Chat with Agent</td>
+                                <td>⭐⭐⭐⭐⭐</td>
+                                <td>80-90%</td>
+                            </tr>
+                            <tr>
+                                <td>디버깅 및 오류 해결</td>
+                                <td>Inline Edit (Ctrl+I)</td>
+                                <td>⭐⭐⭐⭐⭐</td>
+                                <td>50-60%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="section-9-2">
+                    <h3>9.2 일일 개발 루프 최적화</h3>
+                    <p>하루 개발 업무를 90% 자동화하는 체계적인 워크플로우입니다.</p>
+                    
+                    <h4>9.2.1 아침 시작 루틴 (Morning Kickstart - 15분)</h4>
+                    <pre><code>// 1. 프로젝트 상황 파악 (5분)
+@Codebase 어제 이후 변경사항을 요약하고, 
+오늘 작업해야 할 우선순위를 제안해줘
+
+// 2. 의존성 및 보안 체크 (5분)
+@Files package.json package-lock.json
+보안 취약점이나 업데이트 필요한 패키지가 있는지 확인해줘
+
+// 3. 이슈 우선순위화 (5분)
+@Web [프로젝트명] GitHub issues
+오늘 해결할 이슈들의 우선순위를 기술적 복잡도와 비즈니스 영향도로 분류해줘</code></pre>
+                </div>
+                
+                <div id="section-9-3">
+                    <h3>9.3 고급 리팩터링 방법론</h3>
+                    <p>AI 기반 리팩터링으로 코드 품질을 체계적으로 향상시키는 방법론입니다.</p>
+                    
+                    <h4>9.3.1 단계별 리팩터링 프로세스</h4>
+                    <p><strong>Phase 1: 분석 단계 (Analysis Phase)</strong></p>
+                    <pre><code>// 1. 코드베이스 건강도 진단
+@Codebase 이 프로젝트의 코드 품질 지표를 분석해줘:
+- 순환 복잡도가 높은 함수들
+- 중복 코드 패턴들  
+- 테스트가 부족한 모듈들
+- 의존성 그래프의 문제점들
+- 성능 병목 지점들</code></pre>
+                </div>
+                
+                <div id="section-9-4">
+                    <h3>9.4 AI 기반 코드 리뷰 시스템</h3>
+                    <p>사람의 코드 리뷰를 보완하는 AI 시스템으로 코드 품질을 보장합니다.</p>
+                    
+                    <h4>9.4.1 자동 코드 리뷰 체크리스트</h4>
+                    <p><strong>Pre-commit AI 리뷰 프로세스:</strong></p>
+                    <pre><code>// .cursorrules에 추가할 자동 리뷰 규칙
+코드 리뷰 자동화:
+1. 보안 검사 - SQL 인젝션, XSS, 하드코딩된 시크릿 검출
+2. 성능 분석 - 시간 복잡도, 메모리 사용량, 비효율적 루프
+3. 가독성 평가 - 변수명, 함수명, 주석의 적절성
+4. 아키텍처 일관성 - 기존 패턴과의 일치성 검사
+5. 테스트 요구사항 - 테스트 케이스 존재 여부 및 품질</code></pre>
+                </div>
+                
+                <div id="section-9-5">
+                    <h3>9.5 테스트 자동화 워크플로우</h3>
+                    <p>AI를 활용한 포괄적인 테스트 자동화 전략입니다.</p>
+                    
+                    <h4>9.5.1 TDD with AI 워크플로우</h4>
+                    <p>Red-Green-Refactor 사이클의 AI 통합:</p>
+                    <ul>
+                        <li><strong>Red (실패하는 테스트)</strong>: 요구사항 기반 테스트 케이스 AI 생성</li>
+                        <li><strong>Green (테스트 통과)</strong>: 최소한의 구현 코드 AI 작성</li>
+                        <li><strong>Refactor (리팩터링)</strong>: 코드 품질 개선을 AI가 제안</li>
+                    </ul>
+                </div>
+                
+                <div id="section-9-6">
+                    <h3>9.6 디버깅 및 오류 해결 프로세스</h3>
+                    <p>AI를 활용한 체계적인 디버깅 워크플로우입니다.</p>
+                    
+                    <h4>9.6.1 스마트 디버깅 프로세스</h4>
+                    <p>4단계 AI 디버깅 방법론:</p>
+                    <ul>
+                        <li>문제 식별 (Problem Identification): 에러 메시지 분석 및 원인 추정</li>
+                        <li>범위 축소 (Scope Narrowing): 문제 발생 지점 정확한 파악</li>
+                        <li>해결책 탐색 (Solution Discovery): 다양한 해결 방안 제시</li>
+                        <li>검증 및 예방 (Verification &amp; Prevention): 수정 사항 검증 및 재발 방지</li>
+                    </ul>
+                </div>
+                
+                <div id="section-9-7">
+                    <h3>9.7 팀 협업 및 지식 공유 최적화</h3>
+                    <p>AI를 활용한 효율적인 팀 협업 시스템 구축 방법입니다.</p>
+                    
+                    <h4>9.7.1 지식 관리 시스템</h4>
+                    <p>AI 기반 팀 지식베이스 구축:</p>
+                    <ul>
+                        <li>자동 문서화: 코드 변경사항 자동 문서 업데이트</li>
+                        <li>FAQ 생성: 팀 내 질문-답변을 FAQ로 자동 정리</li>
+                        <li>베스트 프랙티스 추출: 우수한 코드 패턴 자동 식별 및 공유</li>
+                        <li>온보딩 자동화: 신입 개발자를 위한 맞춤형 학습 자료 생성</li>
+                    </ul>
+                </div>
+                
+                <div id="section-9-8">
+                    <h3>9.8 성능 최적화 자동화</h3>
+                    <p>AI를 활용한 체계적인 성능 최적화 접근법입니다.</p>
+                    
+                    <h4>9.8.1 성능 모니터링 및 분석</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>최적화 영역</th>
+                                <th>측정 지표</th>
+                                <th>AI 분석 방법</th>
+                                <th>자동화 수준</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>프론트엔드</td>
+                                <td>LCP, FID, CLS</td>
+                                <td>번들 크기 분석, 렌더링 최적화</td>
+                                <td>높음</td>
+                            </tr>
+                            <tr>
+                                <td>백엔드 API</td>
+                                <td>응답 시간, 처리량</td>
+                                <td>쿼리 최적화, 캐싱 전략</td>
+                                <td>중간</td>
+                            </tr>
+                            <tr>
+                                <td>데이터베이스</td>
+                                <td>쿼리 실행 계획</td>
+                                <td>인덱스 최적화, 쿼리 리팩터링</td>
+                                <td>중간</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="section-9-9">
+                    <h3>9.9 배포 및 DevOps 자동화</h3>
+                    <p>AI를 활용한 배포 프로세스 최적화와 운영 자동화입니다.</p>
+                    
+                    <h4>9.9.1 CI/CD 파이프라인 최적화</h4>
+                    <p>AI 기반 배포 전략:</p>
+                    <ul>
+                        <li>자동 테스트 생성: 배포 전 회귀 테스트 자동 생성</li>
+                        <li>위험도 평가: 변경사항의 잠재적 영향도 분석</li>
+                        <li>롤백 계획 수립: 실패 시 자동 복구 시나리오</li>
+                        <li>모니터링 설정: 배포 후 성능 지표 자동 추적</li>
+                    </ul>
+                </div>
+                
+                <div id="section-9-10">
+                    <h3>9.10 KPI 및 생산성 측정</h3>
+                    <p>AI 도구 도입 효과를 정량적으로 측정하고 개선하는 방법입니다.</p>
+                    
+                    <h4>9.10.1 생산성 지표 대시보드</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>지표 카테고리</th>
+                                <th>측정 항목</th>
+                                <th>목표 수치</th>
+                                <th>측정 방법</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>개발 속도</td>
+                                <td>기능 개발 시간, 코드 리뷰 시간</td>
+                                <td>50% 단축</td>
+                                <td>Jira, GitHub 메트릭</td>
+                            </tr>
+                            <tr>
+                                <td>코드 품질</td>
+                                <td>버그 발견률, 기술 부채 지수</td>
+                                <td>30% 개선</td>
+                                <td>SonarQube, 코드 분석</td>
+                            </tr>
+                            <tr>
+                                <td>팀 만족도</td>
+                                <td>개발자 만족도, 학습 효과</td>
+                                <td>4.5/5.0</td>
+                                <td>정기 설문조사</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="section-9-11">
+                    <h3>9.11 보안 및 컴플라이언스 자동화</h3>
+                    <p>AI를 활용한 보안 강화와 컴플라이언스 준수 자동화입니다.</p>
+                    
+                    <h4>9.11.1 자동화된 보안 감사 시스템</h4>
+                    <p>AI 기반 보안 체크포인트:</p>
+                    <ul>
+                        <li>코드 레벨: 취약점 패턴 자동 감지 (OWASP Top 10)</li>
+                        <li>의존성 레벨: 라이브러리 보안 이슈 모니터링</li>
+                        <li>설정 레벨: 보안 설정 오류 자동 감지</li>
+                        <li>런타임 레벨: 비정상적인 접근 패턴 감지</li>
+                    </ul>
+                </div>
+                
+                <div id="section-9-12">
+                    <h3>9.12 지속적 학습 및 개선 체계</h3>
+                    <p>AI 도구와 함께 성장하는 개발팀을 위한 학습 시스템입니다.</p>
+                    
+                    <h4>9.12.1 개인화된 학습 경로</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>개발자 레벨</th>
+                                <th>학습 목표</th>
+                                <th>AI 활용 방법</th>
+                                <th>성장 지표</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>주니어</td>
+                                <td>기본기 습득, 코딩 컨벤션</td>
+                                <td>단계별 가이드, 실시간 피드백</td>
+                                <td>코드 품질 점수</td>
+                            </tr>
+                            <tr>
+                                <td>미드레벨</td>
+                                <td>아키텍처 이해, 최적화</td>
+                                <td>복잡한 문제 해결 연습</td>
+                                <td>기술적 의사결정 능력</td>
+                            </tr>
+                            <tr>
+                                <td>시니어</td>
+                                <td>팀 리딩, 기술 전략</td>
+                                <td>시스템 설계 검토, 멘토링</td>
+                                <td>팀 생산성 향상</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p><strong>워크플로우 완전 가이드 요약:</strong></p>
+                    <p>이 12가지 워크플로우를 단계적으로 도입하면 개발팀의 생산성을 3-5배 향상시킬 수 있습니다. 처음에는 일일 개발 루프(9.2)와 모드 선택 원칙(9.1)부터 시작하여, 점진적으로 다른 영역들을 확장해 나가는 것이 효과적입니다.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script>
+        // 부드러운 스크롤 기능
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // 모바일 사이드바 토글
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+        
+        // 현재 섹션 하이라이트
+        function highlightCurrentSection() {
+            const sections = document.querySelectorAll('section[id^="section-"]');
+            const navLinks = document.querySelectorAll('.toc a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        // 스크롤 이벤트 리스너
+        window.addEventListener('scroll', highlightCurrentSection);
+        
+        // 페이지 로드 시 초기 하이라이트
+        document.addEventListener('DOMContentLoaded', highlightCurrentSection);
+    </script>
+    
+    <style>
+        .toc a.active {
+            background-color: #007bff;
+            color: white !important;
+        }
+    </style>
+
+</body></html>
